@@ -7,3 +7,8 @@ export async function initWebGPU(canvas: HTMLCanvasElement) {
 
   return { device, context, adapter };
 }
+
+
+export function nextMultipleOfK(k: number, value: number): number {
+  return Math.ceil(value / k) * k;
+}
