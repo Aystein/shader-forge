@@ -1,14 +1,11 @@
-import { defaultDevice, defaultPreferredCanvasFormat } from "./System";
-
-let shaderModule: ShaderSystem;
-let shaderCache: Map<string, GPUShaderModule> = new Map();
+import { defaultPreferredCanvasFormat } from "./System";
 
 export class ShaderSystem {
   constructor() {}
 
-  compileFragment(code: string, config?: { entryPoint: string, targets: GPUColorTargetState[] }) {
+  compileFragment(device: GPUDevice, code: string, config?: { entryPoint: string, targets: GPUColorTargetState[] }) {
     return {
-      module: shaderModule.compileShaderModule(code),
+      module: shaderModule.compileShaderModule(device, code),
       entryPoint: config?.entryPoint || "main",
       targets: config?.targets || [
         {
@@ -18,19 +15,15 @@ export class ShaderSystem {
     };
   }
 
-  compileVertex(code: string, config?: { entryPoint }) {
+  compileVertex(device: GPUDevice, code: string, config?: { entryPoint }) {
     return {
-      module: shaderModule.compileShaderModule(code),
+      module: shaderModule.compileShaderModule(device, code),
       entryPoint: config?.entryPoint || "main",
     }
   }
 
-  compileShaderModule(code: string) {
-    if (shaderCache.has(code)) {
-      return shaderCache.get(code);
-    }
-
-    const shaderModule = defaultDevice.createShaderModule({
+  compileShaderModule(device: GPUDevice, code: string) {
+    const shaderModule = device.createShaderModule({
       code,
     });
 
@@ -62,6 +55,6 @@ export class ShaderSystem {
   }
 }
 
-shaderModule = new ShaderSystem();
+const shaderModule = new ShaderSystem();
 
 export { shaderModule }

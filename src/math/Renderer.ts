@@ -6,17 +6,19 @@ import triangleVertWGSL from "./triangle.vert.wgsl?raw";
 import * as GPU from 'zustand/'
 import computeShader from './scatter.compute.wgsl?raw';
 
-const pointSchema = new BufferSchema({
-  position: { type: 'vec2' },
-});
-
 export class Renderer {
   canvasFormat: GPUTextureFormat;
   pipeline: GPURenderPipeline;
+
   schema = new BufferSchema({
     projectionMatrix: { type: 'mat4' },
     screenCorrection: { type: 'vec2' }
   })
+
+  pointSchema = new BufferSchema({
+    position: { type: 'vec2' }
+  });
+
   buffer: GPUBuffer;
   bindGroup: GPUBindGroup;
 
@@ -28,7 +30,7 @@ export class Renderer {
     private device: GPUDevice,
     private adapter: GPUAdapter
     ) {
-    const mypointBuffer = new TypedBuffer(this.device, pointSchema, 6, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX);
+    const mypointBuffer = new TypedBuffer(this.device, this.pointSchema, 6, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX);
 
     mypointBuffer.set(0, {
       position: new Float32Array([0.5, 0.5])
@@ -49,7 +51,6 @@ export class Renderer {
       position: new Float32Array([-0.5, 0.5])
     })
     this.pointBuffer = mypointBuffer;
-    console.log(pointSchema.size);
 
     mypointBuffer.flush();
     console.log(new Float32Array(mypointBuffer.localBuffer));
@@ -97,8 +98,8 @@ export class Renderer {
 
     this.pipeline = device.createRenderPipeline({
       layout: "auto",
-      vertex: shaderModule.compileVertex(triangleVertWGSL),
-      fragment: shaderModule.compileFragment(regFragWGSL),
+      vertex: shaderModule.compileVertex(device, triangleVertWGSL),
+      fragment: shaderModule.compileFragment(device, regFragWGSL),
       primitive: {
         topology: "triangle-list",
       },
@@ -155,12 +156,22 @@ export class Renderer {
     };
 
 
+
+    renderPass(commandEncoder).encode((encoder) => {
+      
+    });
+    // renderToContext
+
+
     /* const computeEncoder = commandEncoder.beginComputePass();
     computeEncoder.setPipeline(this.computePipeline);
     computeEncoder.setBindGroup(0, this.computebindGroup);
     computeEncoder.dispatchWorkgroups(3);
     computeEncoder.end();
+
 */
+
+
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
@@ -170,8 +181,6 @@ export class Renderer {
     passEncoder.draw(6, 3);
     passEncoder.end();
 
-
-    
     device.queue.submit([commandEncoder.finish()]);
   }
 }
