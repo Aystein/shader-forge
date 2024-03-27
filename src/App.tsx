@@ -2,6 +2,7 @@ import React from "react";
 import { initWebGPU } from "./math/util";
 import { Renderer } from "./math/Renderer";
 import * as T from './math/Uniform';
+import { defaultAdapter, defaultDevice } from "./math/System";
 
 console.log(T)
 
@@ -10,10 +11,8 @@ export function App() {
     const ref = React.useRef<HTMLCanvasElement>(null);
 
     React.useEffect(() => {
-        initWebGPU(ref.current).then(({ device, context, adapter }) => {
-            const renderer = new Renderer(context, device, adapter);
-            renderer.render();
-        });
+        const renderer = new Renderer(ref.current.getContext("webgpu"), defaultDevice, defaultAdapter);
+        renderer.render();
     }, []);
 
     return (

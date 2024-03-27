@@ -1,5 +1,5 @@
 import { Matrix4 } from "./Matrix4";
-import { ShaderSystem } from "./ShaderSystem";
+import { ShaderSystem, shaderModule } from "./ShaderSystem";
 import { BufferSchema, TypedBuffer } from "./Uniform";
 import regFragWGSL from "./reg.frag.wgsl?raw";
 import triangleVertWGSL from "./triangle.vert.wgsl?raw";
@@ -97,23 +97,8 @@ export class Renderer {
 
     this.pipeline = device.createRenderPipeline({
       layout: "auto",
-      vertex: {
-        module: device.createShaderModule({
-          code: triangleVertWGSL,
-        }),
-        entryPoint: "main",
-      },
-      fragment: {
-        module: device.createShaderModule({
-          code: regFragWGSL,
-        }),
-        entryPoint: "main",
-        targets: [
-          {
-            format: this.canvasFormat,
-          },
-        ],
-      },
+      vertex: shaderModule.compileVertex(triangleVertWGSL),
+      fragment: shaderModule.compileFragment(regFragWGSL),
       primitive: {
         topology: "triangle-list",
       },
